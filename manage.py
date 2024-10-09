@@ -310,56 +310,134 @@ class scripy:
         df = pd.DataFrame(dataset)
         df.to_csv('Kpis.csv', index=False, encoding='utf-8') 
 
-    # def new(self,urls):
-    #     phone_number_matches=[]
-    #     html_content = requests.get(urls).text 
-    #     soup = BeautifulSoup(html_content,"html.parser")
-    #     data=soup.get_text(separator=' ', strip=True)
-        
-    #     email_pattern = re.compile(r'([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4})')
-    #     phone_number_pattern = re.compile('\+?1?[-. ]?(\(?\d{3}\)?)?[-. ]?(\d{3})[-. ]?(\d{4})([ -.]?(\d{1,4}))?')
-    #     email_matches = re.findall(email_pattern,data)
-    #     phone_number=re.findall(phone_number_pattern,data)
 
-    #     print(email_matches)
-    #     print(phone_number)
-    def new(self, urls):
-        phone_number_matches = []
-        html_content = requests.get(urls).text 
+
+    def new(self, url,urls):
+        name, email, address, titles, social_links, description, logo, phone =[], [], [], [], [], [], [], []
+
+        html_content1 = requests.get(urls).text 
+        soup1 = BeautifulSoup(html_content1,"html.parser")
+
+        div = soup1.find_all('span',class_="BNeawe")
+        address_text = ''
+        for i in div:
+            address_text += i.text + ' '  
+            
+        address_pattern = re.compile(r'Address\s*(.+?)\s*Hours', re.DOTALL)
+        match = address_pattern.search(address_text)
+        if match:
+            address1 = match.group(1).strip()  
+            print(address1)
+
+        # Fetch main page content
+        html_content = requests.get(url).text 
         soup = BeautifulSoup(html_content, "html.parser")
-        data = soup.get_text(separator=' ', strip=True)
-        
-        # email_pattern = re.compile(r'([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4})')
-        # phone_number_pattern = re.compile(r'\+?1?[-. ]?(\(?\d{3}\)?)?[-. ]?(\d{3})[-. ]?(\d{4})([ -.]?(\d{1,4}))?|(\d{3})[-. ]?(\d{3})[-. ]?(\d{4})|(\d{10,15})')
-        # email_matches = re.findall(email_pattern, data)
-        # phone_number_matches = re.findall(phone_number_pattern, data)
-        # print(email_matches)
-        
-        # # Print phone numbers without spaces
-        # for match in phone_number_matches:
-        #     print(''.join(filter(str.isdigit, match)))
+        data1 = soup.get_text(separator=' ', strip=True)
 
-        # pattern = r'(?:https?://)?(?:www\.)?([^/]+)'
-        # match = re.search(pattern, urls)
-        # if match:
-        #     # Split the domain by '.' and take the first part as the company name
-        #     domain = match.group(1)
-        #     company_name = domain.split('.')[0]  # Take the first segment
-        #     print(company_name)
+
+        # description = soup.select('meta[name="description"]')
+        # d=description.attrs["content"]
+        # for i in d:
+        #     print("\ndescription",i)
+        if description:
+            d = description[0].attrs.get("content", "")  # Use get() to safely access content
+            print("\ndescription:", d)
+        else:
+            d = ''  # Fallback if no description is found
+            print("\ndescription: Not found")
+
+        
+        
+        email_pattern = re.compile(r'([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4})')
+        email_matches = re.findall(email_pattern, data1)
+        email = list(dict.fromkeys(email_matches))
+        print(email)
+
+      
+        # # facebook_links = [link['href'] for link in links if re.search(r'facebook\.com', link['href'])]
+        # # twitter_links= [link['href'] for link in links if re.search(r'twitter\.com',link['href'])]
+        # # instagram_links= [link['href'] for link in links if re.search(r'instagram\.com',link['href'])]
+        # # youtube_links= [link['href'] for link in links if re.search(r'youtube\.com',link['href'])] 
+        # # social_links = [facebook_links, twitter_links, instagram_links, linkedin_links, youtube_links]
+        # #social_links=list(dict.fromkeys(linkedin_links))
+
+        links = soup.find_all('a', href=True)
+        linkedin_links= set(link['href'] for link in links if re.search(r'linkedin\.com',link['href']))
+        linkedin_link = next(iter(linkedin_links), None)
+        social_links.append(linkedin_links)
+        print(linkedin_link)
+        
+        # img_tags = soup.find_all('img', src=True)
+        # logo=[]
+        # for img in img_tags:
+        #     src = img['src']
+        #     if re.search(r'logo\.(svg|png)',src,re.IGNORECASE):
+        #         logo.append(src)
+        #         logo_links=logo
+        #         print("logo",logo_links)
+
+
+        img_tags = soup.find_all('img', src=True)
+        logo = [img['src'] for img in img_tags if re.search(r'logo\.(svg|png)', img['src'], re.IGNORECASE)]
+        logo_links = logo  # Assign logo to logo_links here
+        print("Logos:", logo_links)
         
 
-        # location = soup.find('footer').find_all('p')
-        # text=location.text
-        # for p in location:
-        #     print(location)
-        location = soup.find('footer').find_all('p')
-        for p in location:
-            print(p.get_text(strip=True))  
-        # print(location.text)         
-        
-        # Print the text of each paragraph
-        # for p in location:
-        #     print(p.get_text(strip=True))  
+        title=soup.title.string
+        print("title:",title)
+
+        description = soup.select('meta[name="description"]')
+        d=description[0].attrs["content"]
+        print("\ndescription",d)
+
+        # phone_number_pattern = re.compile(r'\b\d{3}[-.]?\d{3}[-.]?\d{4}\b|\d{10}')
+        # phone_number_matches = re.findall(phone_number_pattern, data1)
+        # phone = list(dict.fromkeys(phone_number_matches))  # remove duplicates
+
+        # for number in phone:
+        #     print(number)
+
+        # for match in phone:
+        #     digit_only = ''.join(filter(str.isdigit, match))
+        #     for i in digit_only:
+        #         phone.append(i)  
+
+            
+
+ 
+        pattern = r'(?:https?://)?(?:www\.)?([^/]+)'
+        match = re.search(pattern, url)
+        if match:
+            domain = match.group(1)
+            company_name = domain.split('.')[0] 
+            print("\ncompny name:",company_name)
+
+      
+        name.append(company_name)
+        email.append(email)
+       
+        address.append(address1)
+        titles.append(title)
+        description.append(d)
+        social_links.append(linkedin_links)
+        logo.append(logo_links)
+       
+        min_length = min(len(name),len(email),len(address),len(title),len(description),len(social_links),len(logo))
+
+
+        dataset = {
+                    'Company_name' : name[:min_length],
+                    'Email': email[:min_length],
+                    # 'Phone': phone[:min_length],
+                    'Address':address[:min_length],
+                    'Title': titles[:min_length],
+                    'Description' : description[:min_length],
+                    'Social_links': social_links[:min_length],
+                    'LOGO': logo[:min_length]
+                }
+        df = pd.DataFrame(dataset)
+        df.to_csv('Data.csv', index=False, encoding='utf-8') 
+
 
 
 
@@ -372,17 +450,17 @@ class scripy:
 
            
 p1=scripy()
-url1="https://careers.dotsquares.com/"
+url1="https://www.cognizant.com/in/en"
 # url2="https://www.a3logics.com/careers/"
 # url3="https://www.anavcloudsoftwares.com/careers/"  
 
 # url5="https://archiveinfotech.com/careers/"
 # url6="https://brixcodetechnologies.com/career"
 # url7="https://ijsinfotech.com/career/"
-url8="https://iskylar.com/career/"    
+# url8="https://iskylar.com/career/"    
 # url9="https://www.kadamtech.com/career/"  
 # url10="https://www.digitalwhopper.com/career"  
-# url11="https://www.kpis.in/career"
+url11="https://aaronsoftech.com/home"
 # # p1.dotsquare(url1)
 # p1.a3Logics(url2)
 # p1.anvaclouds(url3)
@@ -395,9 +473,11 @@ url8="https://iskylar.com/career/"
 # p1.kpis(url11)
 
 url12="https://deorwine.com/"
-url13="https://www.google.com/search?gs_ssp=eJzj4tVP1zc0TDI3MDTNLUsxYLRSNagwtjRLSba0TDMwSgMDK4MKc0MD46SU1BTT1MRUMwvTNC-BgqLEkozEXIXi_LSS8sSiVADw_RZr&q=pratham+software&oq=pratham&gs_lcrp=EgZjaHJvbWUqDQgBEC4YrwEYxwEYgAQyBggAEEUYOzINCAEQLhivARjHARiABDIQCAIQLhjHARixAxjRAxiABDIMCAMQABhDGIAEGIoFMgYIBBBFGEAyDAgFEAAYQxiABBiKBTIHCAYQABiABDIHCAcQABiABNIBCDMzMTlqMGo3qAIIsAIB&sourceid=chrome&ie=UTF-8"
-
-p1.new(url1)
+url14='https://www.google.com/search?q=dotsquares+technologies+india+pvt+ltd&sca_esv=e55772a648afc7ac&ei=6GQGZ5rDJ-Gs4-EPz8aHwAg&gs_ssp=eJwNx8kNgCAQAMD4NbEHPr5lccGjBLtYwFUSIx5oKF_nN2XVLA2Aza5Da7IsxlrmdjDeGlaaFCECjDLDwI4lMGtUPWmcah_TfT50zbdIs1v3uMUl_Am7DySON4kt-Q_6Oh1-&oq=&gs_lp=Egxnd3Mtd2l6LXNlcnAiACoCCAAyJhAuGIAEGLQCGNQDGOUCGMcBGLcDGIoFGOoCGIoDGI4FGK8B2AEBMh0QABiABBi0AhjUAxjlAhi3AxiKBRjqAhiKA9gBATIdEAAYgAQYtAIY1AMY5QIYtwMYigUY6gIYigPYAQEyHRAAGIAEGLQCGNQDGOUCGLcDGIoFGOoCGIoD2AEBMh0QABiABBi0AhjUAxjlAhi3AxiKBRjqAhiKA9gBATIaEAAYgAQYtAIY5QIYtwMYigUY6gIYigPYAQEyHRAAGIAEGLQCGNQDGOUCGLcDGIoFGOoCGIoD2AEBMh0QABiABBi0AhjUAxjlAhi3AxiKBRjqAhiKA9gBATIdEAAYgAQYtAIY1AMY5QIYtwMYigUY6gIYigPYAQEyHRAAGIAEGLQCGNQDGOUCGLcDGIoFGOoCGIoD2AEBMhYQABgDGLQCGOUCGOoCGIwDGI8B2AECMhYQABgDGLQCGOUCGOoCGIwDGI8B2AECMhYQABgDGLQCGOUCGOoCGIwDGI8B2AECMhYQABgDGLQCGOUCGOoCGIwDGI8B2AECMhYQABgDGLQCGOUCGOoCGIwDGI8B2AECMhYQABgDGLQCGOUCGOoCGIwDGI8B2AECMhYQABgDGLQCGOUCGOoCGIwDGI8B2AECMhYQLhgDGLQCGOUCGOoCGIwDGI8B2AECMhYQABgDGLQCGOUCGOoCGIwDGI8B2AECMhYQABgDGLQCGOUCGOoCGIwDGI8B2AECSNUKUABYAHABeAGQAQCYAQCgAQCqAQC4AQHIAQD4AQGYAgGgAguoAhSYAwu6BgQIARgHugYGCAIQARgKkgcBMaAHAA&sclient=gws-wiz-serp'
+url13="https://www.google.com/search?q=deorwine+infotech&oq=de&gs_lcrp=EgZjaHJvbWUqBggDEEUYOzIGCAAQRRg8MgYIARBFGDwyEggCEC4YQxjHARjRAxiABBiKBTIGCAMQRRg7MgYIBBBFGDkyEggFEC4YQxjHARjRAxiABBiKBTIMCAYQABhDGIAEGIoFMgYIBxBFGDzSAQgzMzUwajBqN6gCCLACAQ&sourceid=chrome&ie=UTF-8"
+url15="https://www.google.com/search?gs_ssp=eJzj4tVP1zc0TDI3MDTNLUsxYLRSNagwtjRLSba0TDMwSgMDK4MKc0MD46SU1BTT1MRUMwvTNC-BgqLEkozEXIXi_LSS8sSiVADw_RZr&q=pratham+software&oq=prath&gs_lcrp=EgZjaHJvbWUqDQgBEC4YrwEYxwEYgAQyBggAEEUYOzINCAEQLhivARjHARiABDIGCAIQRRhAMgYIAxBFGDkyEAgEEC4YxwEYsQMY0QMYgAQyBwgFEAAYgAQyCggGEAAYsQMYgAQyCggHEAAYsQMYgATSAQg3Njg2ajBqN6gCCLACAQ&sourceid=chrome&ie=UTF-8"
+url17="https://www.google.com/search?gs_ssp=eJzj4tVP1zc0TCpPy64wSioxYLRSNagwtjRLSTIzMk5OszBPNDcztDKoMDQ3sUhJSTMwSzZMNEg2M_YSTUwsys9TKM5PK0lNzlAoKCtRyClJAQBkeRdw&q=aaron+softech+pvt+ltd&oq=aaronsoftech&gs_lcrp=EgZjaHJvbWUqDwgBEC4YDRivARjHARiABDIGCAAQRRg5Mg8IARAuGA0YrwEYxwEYgAQyCQgCEAAYDRiABDIKCAMQABiABBiiBDIKCAQQABiABBiiBDIKCAUQABiABBiiBDIGCAYQRRg8MgYIBxBFGDzSAQgxOTY2ajBqN6gCCLACAQ&sourceid=chrome&ie=UTF-8"
+p1.new(url11,url17)
 
 
 
