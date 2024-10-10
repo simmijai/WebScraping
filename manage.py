@@ -20,7 +20,6 @@ class scripy:
         apply_link="https://careers.dotsquares.com/apply/"
         
         for a in data:
-           
             links = a.get('href')
 
             html_content = requests.get(links).text 
@@ -29,7 +28,7 @@ class scripy:
             description = soup.find('div', class_='job-description-left').text
             titles.append(title)
             descriptions.append(description)
-            # apply_link.append(apply_link)
+
             dataset = {
                     'TITLE' : titles,
                     'DESCRIPTION' : descriptions,
@@ -48,7 +47,6 @@ class scripy:
         soup = BeautifulSoup(html_content,"html.parser")
         data = soup.find('section', class_='career-opt').find_all('a')
         for a in data:
-           
             links = a.get('href')
 
             html_content = requests.get(links).text 
@@ -57,6 +55,7 @@ class scripy:
             description = soup.find('div', class_='career-info').text
             titles.append(title)
             descriptions.append(description)
+
             dataset = {
                     'TITLE' : titles,
                     'DESCRIPTION' : descriptions,
@@ -79,9 +78,7 @@ class scripy:
         title1 = soup.find_all('div',class_="position_Description")
         for title in title1:
             h3 = title.find('h3')
-            print(h3.text)
             p_tags = title.find('p')  
-            print(p_tags.text)
             
             for h3 in h3:
                 titles.append(h3.text)  
@@ -111,37 +108,26 @@ class scripy:
             html_content = requests.get(urls).text
             soup = BeautifulSoup(html_content, "html.parser")
 
-            # Find all titles
             title_elements = soup.find_all('h2', class_='vc_custom_heading')
             for h2 in title_elements:
-                title_text = h2.text.strip()  # Clean up the text
-                titles.append(title_text)  # Append title to the list
-                print(h2)
+                title_text = h2.text.strip()  
+                titles.append(title_text)  
 
-            # Find all descriptions
             description_elements = soup.find_all('div', class_='wpb_raw_code')
             for div in description_elements:
-                description_text = div.text.strip()  # Clean up the text
-                descriptions.append(description_text)  # Append description to the list
-                print(div)
+                description_text = div.text.strip()  
+                descriptions.append(description_text)  
 
-            # Print lengths after both loops
             print(f"Titles Length: {len(titles)}")
             print(f"Descriptions Length: {len(descriptions)}")
 
-            # # Use min length to ensure matching pairs
-    
-
             min_length = min(len(titles), len(descriptions))
-
             dataset = {
                 'TITLE': titles[:min_length],
                 'DESCRIPTION': descriptions[:min_length],
                 'FETCHTIME': [current_time] * min_length,
             }
             df = pd.DataFrame(dataset)
-
-            # # Save to CSV
             df.to_csv('archiveinfotech.csv', index=False, encoding='utf-8')
   
     def brixcode(self,urls):
@@ -152,8 +138,6 @@ class scripy:
         apply_link= "https://brixcodetechnologies.com/apply_form"
         html_content = requests.get(urls).text 
         soup = BeautifulSoup(html_content,"html.parser")
-
-
 
         title = soup.find('section', class_="about-offer")
         h5=title.find_all('h5')
@@ -186,13 +170,10 @@ class scripy:
         for t in title[2:]:
             titles.append(t.text)
         
-        #  print(t.text)
         for p in description[2:]:
-            # print(p.text)
             descriptions.append(p.text)
         print(f"Titles Length: {len(titles)}")
         print(f"Descriptions Length: {len(descriptions)}")
-
 
         dataset = {
                     'TITLE' : titles,
@@ -218,13 +199,9 @@ class scripy:
 
             html_content = requests.get(links).text 
             soup = BeautifulSoup(html_content,"html.parser")
-
-
             title = soup.find('h1', class_='elementor-heading-title').text
             titles.append(title)
-            
-            # print(f"Titles Length: {len(titles)}")
-            # print(f"Descriptions Length: {len(descriptions)}")
+        
             dataset = {
                     'TITLE' : titles,
                     'APPLYLINK': apply_link,
@@ -247,6 +224,7 @@ class scripy:
         description = soup.find_all('div', class_="well")
         for p in description:
             descriptions.append(p.text)
+
         dataset = {
                     'TITLE' : titles,
                     'DESCRIPTION' : descriptions,
@@ -294,12 +272,12 @@ class scripy:
 
         description=soup.find_all('p', class_="fs-6")
 
-        for i in range(0,18,2):  # Step by 2
+        for i in range(0,18,2):  
 
             if i < len(description):
                 pair = description[i].text
-                if i + 1 < len(description):  # Check if the next index is valid
-                    pair += ' ' + description[i + 1].text  # Concatenate the two texts
+                if i + 1 < len(description):  
+                    pair += ' ' + description[i + 1].text  
                     descriptions.append(pair)
         dataset = {
                     'TITLE' : titles,
@@ -326,158 +304,146 @@ class scripy:
         address_pattern = re.compile(r'Address\s*(.+?)\s*Hours', re.DOTALL)
         match = address_pattern.search(address_text)
         if match:
-            address1 = match.group(1).strip()  
+            address1 = match.group(1).strip()
             print(address1)
 
+
         # Fetch main page content
-        html_content = requests.get(url).text 
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36',
+            'Referer': url,
+        }
+
+        html_content = requests.get(url, headers=headers).text 
         soup = BeautifulSoup(html_content, "html.parser")
         data1 = soup.get_text(separator=' ', strip=True)
 
-
-        # description = soup.select('meta[name="description"]')
-        # d=description.attrs["content"]
-        # for i in d:
-        #     print("\ndescription",i)
-        if description:
-            d = description[0].attrs.get("content", "")  # Use get() to safely access content
-            print("\ndescription:", d)
-        else:
-            d = ''  # Fallback if no description is found
-            print("\ndescription: Not found")
-
-        
-        
-        email_pattern = re.compile(r'([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4})')
-        email_matches = re.findall(email_pattern, data1)
-        email = list(dict.fromkeys(email_matches))
-        print(email)
-
-      
-        # # facebook_links = [link['href'] for link in links if re.search(r'facebook\.com', link['href'])]
-        # # twitter_links= [link['href'] for link in links if re.search(r'twitter\.com',link['href'])]
-        # # instagram_links= [link['href'] for link in links if re.search(r'instagram\.com',link['href'])]
-        # # youtube_links= [link['href'] for link in links if re.search(r'youtube\.com',link['href'])] 
-        # # social_links = [facebook_links, twitter_links, instagram_links, linkedin_links, youtube_links]
-        # #social_links=list(dict.fromkeys(linkedin_links))
-
-        links = soup.find_all('a', href=True)
-        linkedin_links= set(link['href'] for link in links if re.search(r'linkedin\.com',link['href']))
-        linkedin_link = next(iter(linkedin_links), None)
-        social_links.append(linkedin_links)
-        print(linkedin_link)
-        
-        # img_tags = soup.find_all('img', src=True)
-        # logo=[]
-        # for img in img_tags:
-        #     src = img['src']
-        #     if re.search(r'logo\.(svg|png)',src,re.IGNORECASE):
-        #         logo.append(src)
-        #         logo_links=logo
-        #         print("logo",logo_links)
-
-
-        img_tags = soup.find_all('img', src=True)
-        logo = [img['src'] for img in img_tags if re.search(r'logo\.(svg|png)', img['src'], re.IGNORECASE)]
-        logo_links = logo  # Assign logo to logo_links here
-        print("Logos:", logo_links)
-        
-
-        title=soup.title.string
-        print("title:",title)
-
-        description = soup.select('meta[name="description"]')
-        d=description[0].attrs["content"]
-        print("\ndescription",d)
-
-        # phone_number_pattern = re.compile(r'\b\d{3}[-.]?\d{3}[-.]?\d{4}\b|\d{10}')
-        # phone_number_matches = re.findall(phone_number_pattern, data1)
-        # phone = list(dict.fromkeys(phone_number_matches))  # remove duplicates
-
-        # for number in phone:
-        #     print(number)
-
-        # for match in phone:
-        #     digit_only = ''.join(filter(str.isdigit, match))
-        #     for i in digit_only:
-        #         phone.append(i)  
-
-            
-
- 
         pattern = r'(?:https?://)?(?:www\.)?([^/]+)'
         match = re.search(pattern, url)
         if match:
             domain = match.group(1)
-            company_name = domain.split('.')[0] 
-            print("\ncompny name:",company_name)
+            company_name = domain.split('.')[0]
+            print(company_name) 
 
-      
+        email_pattern = re.compile(r'([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4})')
+        email_matches = re.findall(email_pattern, data1)
+        email = list(dict.fromkeys(email_matches))
+
+        phone_number_pattern = re.compile(r""" 
+                                          \b\d{10}\b|\b(?:\+91|091)?\s?\d{10}\b|\b0\d{2}[-.]?\d{8}\b|\b0\d{2}[-.]?\d{3}[-.]?\d{4}\b""", re.VERBOSE)
+        phone_number_matches = phone_number_pattern.findall(data1)
+        phone_numbers = list(dict.fromkeys(phone_number_matches)) 
+        phone_numbers = [''.join(filter(str.isdigit, num)) for num in phone_numbers]
+        for phone_number in phone_numbers:
+            print("Phone Number:", phone_number)
+            phone.append(phone_number)
+
+
+        a=soup.title
+        if a:
+            title=a.string
+            print(title)
+        else:
+            title=None
+        
+        
+        description_tag = soup.find('meta', attrs={'name': 'description'})
+        if description_tag:
+            description_content = description_tag.get('content', '')
+            print(description_content)
+        else:
+            description_content=None
+          
+        
+        # facebook_links = [link['href'] for link in links if re.search(r'facebook\.com', link['href'])]
+        # twitter_links= [link['href'] for link in links if re.search(r'twitter\.com',link['href'])]
+        # instagram_links= [link['href'] for link in links if re.search(r'instagram\.com',link['href'])
+        # youtube_links= [link['href'] for link in links if re.search(r'youtube\.com',link['href'])] 
+        # social_links = [facebook_links, twitter_links, instagram_links, linkedin_links, youtube_links]
+        # social_links=list(dict.fromkeys(linkedin_links))
+
+        # links = soup.find_all('a', href=True)
+        # linkedin_links= set(link['href'] for link in links if re.search(r'linkedin\.com',link['href']))
+        # linkedin_link = next(iter(linkedin_links), None)
+        # social_links.append(linkedin_links)
+        # print(social_links)
+
+
+
+        links = soup.find_all('a', href=True)
+
+        facebook_links = [link['href'] for link in links if re.search(r'facebook\.com', link['href'])]
+        twitter_links = [link['href'] for link in links if re.search(r'twitter\.com', link['href'])]
+        instagram_links = [link['href'] for link in links if re.search(r'instagram\.com', link['href'])]
+        youtube_links = [link['href'] for link in links if re.search(r'youtube\.com', link['href'])]
+        linkedin_links = [link['href'] for link in links if re.search(r'linkedin\.com', link['href'])]
+
+        # Combine all links into a structured dictionary
+        social_links.append(['Facebook', list(dict.fromkeys(facebook_links)) if facebook_links else None])
+        social_links.append(['Twitter', list(dict.fromkeys(twitter_links)) if twitter_links else None])
+        social_links.append(['Instagram', list(dict.fromkeys(instagram_links)) if instagram_links else None])
+        social_links.append(['LinkedIn', list(dict.fromkeys(linkedin_links)) if linkedin_links else None])
+        social_links.append(['YouTube', list(dict.fromkeys(youtube_links)) if youtube_links else None])
+
+
+        # Print the social links
+        print(social_links)
+                    
+
+        logos = soup.find_all('img')
+        pattern = re.compile(r'[/\-]logo', re.IGNORECASE)
+        match = next((img for img in logos if pattern.search(img.get('src', ''))), None)
+        if match:
+            logo_link = match.get('src')
+            print("Logo link:", logo_link)
+            if logo_link:
+                logo.append(logo_link)
+
+
         name.append(company_name)
         email.append(email)
-       
         address.append(address1)
-        titles.append(title)
-        description.append(d)
-        social_links.append(linkedin_links)
-        logo.append(logo_links)
-       
-        min_length = min(len(name),len(email),len(address),len(title),len(description),len(social_links),len(logo))
-
-
-        dataset = {
-                    'Company_name' : name[:min_length],
-                    'Email': email[:min_length],
-                    # 'Phone': phone[:min_length],
-                    'Address':address[:min_length],
-                    'Title': titles[:min_length],
-                    'Description' : description[:min_length],
-                    'Social_links': social_links[:min_length],
-                    'LOGO': logo[:min_length]
-                }
-        df = pd.DataFrame(dataset)
-        df.to_csv('Data.csv', index=False, encoding='utf-8') 
 
 
 
 
-       
-    
-    
+
+        print("Lengths of lists:")
+        print("Name:", len(name))
+        print("Email:", len(email))
+        print("Address:", len(address))
+        print("Titles:", len(titles))
+        print("Description:", len(description))
+        print("Social_links:", len(social_links))
+        print("LOGO:", len(logo))
+        print("Phone:", len(phone))
             
+        min_length = min(len(name),len(email),len(address),len(titles),len(description),len(social_links),len(logo),len(phone))
+        
+        dataset = {
+        'Company_name': name[:min_length],
+        'Email': email[:min_length],
+        'Phone': phone[:min_length] or [''] * min_length,  # Fill with empty strings if empty
+        'Address': address[:min_length],
+        'Title': titles[:min_length] or [''] * min_length,  # Fill with empty strings if empty
+        'Description': description[:min_length] or [''] * min_length,  # Fill with empty strings if empty
+        'Social_links': social_links[:min_length],
+        'LOGO': logo[:min_length]
+    }
 
-
+        try:
+            df = pd.DataFrame(dataset)
+            df.to_csv('Data5.csv', index=False, encoding='utf-8')
+            print("Data successfully saved to Data5.csv.")
+        except Exception as e:
+            print("error:")
 
            
 p1=scripy()
-url1="https://www.cognizant.com/in/en"
-# url2="https://www.a3logics.com/careers/"
-# url3="https://www.anavcloudsoftwares.com/careers/"  
-
-# url5="https://archiveinfotech.com/careers/"
-# url6="https://brixcodetechnologies.com/career"
-# url7="https://ijsinfotech.com/career/"
-# url8="https://iskylar.com/career/"    
-# url9="https://www.kadamtech.com/career/"  
-# url10="https://www.digitalwhopper.com/career"  
-url11="https://aaronsoftech.com/home"
-# # p1.dotsquare(url1)
-# p1.a3Logics(url2)
-# p1.anvaclouds(url3)
-# p1.archiveinfotech(url5)
-# p1.brixcode(url6)
-# # p1.ijsinfotech(url7)
-# p1.iskylar(url8)
-# p1.KadamTech(url9)
-# p1.Digitalwhoper(url10)
-# p1.kpis(url11)
-
-url12="https://deorwine.com/"
-url14='https://www.google.com/search?q=dotsquares+technologies+india+pvt+ltd&sca_esv=e55772a648afc7ac&ei=6GQGZ5rDJ-Gs4-EPz8aHwAg&gs_ssp=eJwNx8kNgCAQAMD4NbEHPr5lccGjBLtYwFUSIx5oKF_nN2XVLA2Aza5Da7IsxlrmdjDeGlaaFCECjDLDwI4lMGtUPWmcah_TfT50zbdIs1v3uMUl_Am7DySON4kt-Q_6Oh1-&oq=&gs_lp=Egxnd3Mtd2l6LXNlcnAiACoCCAAyJhAuGIAEGLQCGNQDGOUCGMcBGLcDGIoFGOoCGIoDGI4FGK8B2AEBMh0QABiABBi0AhjUAxjlAhi3AxiKBRjqAhiKA9gBATIdEAAYgAQYtAIY1AMY5QIYtwMYigUY6gIYigPYAQEyHRAAGIAEGLQCGNQDGOUCGLcDGIoFGOoCGIoD2AEBMh0QABiABBi0AhjUAxjlAhi3AxiKBRjqAhiKA9gBATIaEAAYgAQYtAIY5QIYtwMYigUY6gIYigPYAQEyHRAAGIAEGLQCGNQDGOUCGLcDGIoFGOoCGIoD2AEBMh0QABiABBi0AhjUAxjlAhi3AxiKBRjqAhiKA9gBATIdEAAYgAQYtAIY1AMY5QIYtwMYigUY6gIYigPYAQEyHRAAGIAEGLQCGNQDGOUCGLcDGIoFGOoCGIoD2AEBMhYQABgDGLQCGOUCGOoCGIwDGI8B2AECMhYQABgDGLQCGOUCGOoCGIwDGI8B2AECMhYQABgDGLQCGOUCGOoCGIwDGI8B2AECMhYQABgDGLQCGOUCGOoCGIwDGI8B2AECMhYQABgDGLQCGOUCGOoCGIwDGI8B2AECMhYQABgDGLQCGOUCGOoCGIwDGI8B2AECMhYQABgDGLQCGOUCGOoCGIwDGI8B2AECMhYQLhgDGLQCGOUCGOoCGIwDGI8B2AECMhYQABgDGLQCGOUCGOoCGIwDGI8B2AECMhYQABgDGLQCGOUCGOoCGIwDGI8B2AECSNUKUABYAHABeAGQAQCYAQCgAQCqAQC4AQHIAQD4AQGYAgGgAguoAhSYAwu6BgQIARgHugYGCAIQARgKkgcBMaAHAA&sclient=gws-wiz-serp'
-url13="https://www.google.com/search?q=deorwine+infotech&oq=de&gs_lcrp=EgZjaHJvbWUqBggDEEUYOzIGCAAQRRg8MgYIARBFGDwyEggCEC4YQxjHARjRAxiABBiKBTIGCAMQRRg7MgYIBBBFGDkyEggFEC4YQxjHARjRAxiABBiKBTIMCAYQABhDGIAEGIoFMgYIBxBFGDzSAQgzMzUwajBqN6gCCLACAQ&sourceid=chrome&ie=UTF-8"
-url15="https://www.google.com/search?gs_ssp=eJzj4tVP1zc0TDI3MDTNLUsxYLRSNagwtjRLSba0TDMwSgMDK4MKc0MD46SU1BTT1MRUMwvTNC-BgqLEkozEXIXi_LSS8sSiVADw_RZr&q=pratham+software&oq=prath&gs_lcrp=EgZjaHJvbWUqDQgBEC4YrwEYxwEYgAQyBggAEEUYOzINCAEQLhivARjHARiABDIGCAIQRRhAMgYIAxBFGDkyEAgEEC4YxwEYsQMY0QMYgAQyBwgFEAAYgAQyCggGEAAYsQMYgAQyCggHEAAYsQMYgATSAQg3Njg2ajBqN6gCCLACAQ&sourceid=chrome&ie=UTF-8"
-url17="https://www.google.com/search?gs_ssp=eJzj4tVP1zc0TCpPy64wSioxYLRSNagwtjRLSTIzMk5OszBPNDcztDKoMDQ3sUhJSTMwSzZMNEg2M_YSTUwsys9TKM5PK0lNzlAoKCtRyClJAQBkeRdw&q=aaron+softech+pvt+ltd&oq=aaronsoftech&gs_lcrp=EgZjaHJvbWUqDwgBEC4YDRivARjHARiABDIGCAAQRRg5Mg8IARAuGA0YrwEYxwEYgAQyCQgCEAAYDRiABDIKCAMQABiABBiiBDIKCAQQABiABBiiBDIKCAUQABiABBiiBDIGCAYQRRg8MgYIBxBFGDzSAQgxOTY2ajBqN6gCCLACAQ&sourceid=chrome&ie=UTF-8"
-p1.new(url11,url17)
+url1="https://www.zonettech.com"
+# url2="https://www.google.com/search?q=zordial&sca_esv=97958ac28674b0c2&ei=Wb4HZ9HVNtGNnesPpO_YiQs&gs_ssp=eJzj4tVP1zc0zEgpsrCoskw3YLRSNagwtjRLSbY0SjG1MDdKMrUwtDKoSDZINbSwNE01TEpLNEu0NPdir8ovSslMzAEAKRUSCg&oq=zordial&gs_lp=Egxnd3Mtd2l6LXNlcnAiB3pvcmRpYWwqAggAMhEQLhiABBiRAhjHARiKBRivATIFEAAYgAQyBRAAGIAEMgUQABiABDIFEAAYgAQyAhAmMgIQJjIIEAAYgAQYogQyCBAAGIAEGKIEMggQABiABBiiBDIgEC4YgAQYkQIYxwEYigUYrwEYlwUY3AQY3gQY4ATYAQJIgR9QmAtYmAtwAXgBkAEAmAHoAaAB6AGqAQMyLTG4AQHIAQD4AQH4AQKYAgOgAvcWqAIUwgIjEC4YgAQYtAIY5QIYxwEYtwMYigUY6gIYigMYjgUYrwHYAQHCAh0QABiABBi0AhjUAxjlAhi3AxiKBRjqAhiKA9gBAcICFhAAGAMYtAIY5QIY6gIYjAMYjwHYAQLCAhYQLhgDGLQCGOUCGOoCGIwDGI8B2AECmAOdAboGBAgBGAe6BgYIAhABGAqSBwswLjEuMC4xLjgtMaAHtQk&sclient=gws-wiz-serpp1.new(url1,url2)"
+url2="https://www.google.com/search?gs_ssp=eJzj4tVP1zc0TC42LDZIryo2YLRSNagwtjRLSU40TEtJSjQwSzI1tjKosEhONEi2TEs0TTIzNDBPNPASqMrPS1UoSU3OUCguTlbISgUAA28Vxg&q=zone+tech+ssc+je&oq=zonettech&gs_lcrp=EgZjaHJvbWUqDwgFEC4YDRivARjHARiABDIGCAAQRRg5MgkIARAAGA0YgAQyCQgCEAAYDRiABDIJCAMQABgNGIAEMgkIBBAAGA0YgAQyDwgFEC4YDRivARjHARiABDIJCAYQABgNGIAEMgkIBxAAGA0YgATSAQg0OTkwajBqN6gCCLACAQ&sourceid=chrome&ie=UTF-8"
+p1.new(url1,url2)
 
 
 
